@@ -1,0 +1,709 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensitive Data Discovery Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .search-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        #sdtarget {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        #sdtarget:focus {
+            border-color: #4a6491;
+        }
+        
+        .search-btn {
+            background-color: #4a6491;
+            color: white;
+            border: none;
+            padding: 0 25px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .search-btn:hover {
+            background-color: #3a5479;
+        }
+        
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .category {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .category:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .category h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        
+        .category p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .category-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+        
+        .category-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .results {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .dork-list {
+            list-style-type: none;
+        }
+        
+        .dork-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dork-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dork-query {
+            flex: 1;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        .dork-action {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        .dork-action:hover {
+            background-color: #219653;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            padding: 20px 0;
+        }
+        
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .categories {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            #sdtarget {
+                border-radius: 5px;
+                margin-bottom: 10px;
+            }
+            
+            .search-btn {
+                border-radius: 5px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sensitive Data Discovery Tool</h1>
+            <p class="subtitle">Identify exposed sensitive information using Google Dorks</p>
+        </header>
+        
+        <div class="warning">
+            <strong>Important:</strong> This tool is for educational and security assessment purposes only. 
+            Use it responsibly and only on domains you own or have explicit permission to test.
+        </div>
+        
+        <div class="search-section">
+            <h2>Target Domain</h2>
+            <div class="input-group">
+                <input type="text" id="sdtarget" placeholder="Enter target domain (e.g., example.com)">
+                <button class="search-btn" onclick="validateDomain()">Set Domain</button>
+            </div>
+            
+            <h2>Search Categories</h2>
+            <div class="categories">
+                <div class="category">
+                    <h3>Basic Credentials</h3>
+                    <p>Search for passwords, usernames, emails, API keys, and authentication tokens.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(1)">Search (5 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>API Keys & Tokens</h3>
+                    <p>Find private keys, access keys, bearer tokens, OAuth, and session IDs.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(2)">Search (5 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>Service Passwords</h3>
+                    <p>Discover admin, database, FTP, SSH, and mail service passwords.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(3)">Search (5 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>Auth Tokens</h3>
+                    <p>Look for cookies, auth tokens, login keys, and root passwords.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(4)">Search (5 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>All Credentials</h3>
+                    <p>Comprehensive search for all types of credentials (25 dorks).</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(5)">Search (25 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>User Data in SQL</h3>
+                    <p>Find user information exposed in SQL files.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(6)">Search (5 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>Financial Data</h3>
+                    <p>Search for credit cards, accounts, transactions, and financial information.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(7)">Search (5 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>Personal Info</h3>
+                    <p>Look for SSN, passport, driver's license, and personal identification data.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(8)">Search (5 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>Top 50 Critical</h3>
+                    <p>The most critical dorks for sensitive data discovery.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(41)">Search (50 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>Financial Focus</h3>
+                    <p>Comprehensive financial data search across multiple sources.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(42)">Search (34 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>PII Focus</h3>
+                    <p>Search specifically for Personally Identifiable Information.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(43)">Search (35 dorks)</button>
+                </div>
+                
+                <div class="category">
+                    <h3>Credentials Focus</h3>
+                    <p>Comprehensive search for all types of credentials and tokens.</p>
+                    <button class="category-btn" onclick="sensitiveDataSearch(44)">Search (50 dorks)</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <h2>Generated Google Dorks</h2>
+            <ul class="dork-list" id="dorkList">
+                <!-- Dorks will be populated here by JavaScript -->
+            </ul>
+        </div>
+        
+        <footer>
+            <p>Sensitive Data Discovery Tool &copy; 2023 | For educational and authorized security testing only</p>
+        </footer>
+    </div>
+
+    <script>
+        // Your original function with slight modifications for the UI
+        function sensitiveDataSearch(category) {
+            var targetDomain = document.getElementById('sdtarget').value;
+            
+            if (!targetDomain) {
+                alert('Please enter a target domain.');
+                return;
+            }
+            
+            var dorks = [];
+            var categoryName = "";
+            
+            // Define dork categories
+            switch(category) {
+                case 1: // Basic Credentials
+                    categoryName = "Basic Credentials";
+                    dorks = [
+                        'site:example.com intext:"password" | intext:"passwd" | intext:"pwd"',
+                        'site:example.com intext:"username" | intext:"user" | intext:"login"',
+                        'site:example.com intext:"email" | intext:"e-mail" | intext:"mail"',
+                        'site:example.com intext:"api_key" | intext:"apikey" | intext:"api-key"',
+                        'site:example.com intext:"secret" | intext:"token" | intext:"auth"'
+                    ];
+                    break;
+                    
+                case 2: // API Keys & Tokens
+                    categoryName = "API Keys & Tokens";
+                    dorks = [
+                        'site:example.com intext:"private key" | intext:"private_key"',
+                        'site:example.com intext:"access key" | intext:"access_key"',
+                        'site:example.com intext:"bearer token" | intext:"bearer_token"',
+                        'site:example.com intext:"oauth" | intext:"oauth_token"',
+                        'site:example.com intext:"session" | intext:"session_id"'
+                    ];
+                    break;
+                    
+                case 3: // Service Passwords
+                    categoryName = "Service Passwords";
+                    dorks = [
+                        'site:example.com intext:"admin_password" | intext:"admin_pwd"',
+                        'site:example.com intext:"db_password" | intext:"db_pwd"',
+                        'site:example.com intext:"ftp_password" | intext:"ftp_pwd"',
+                        'site:example.com intext:"ssh_password" | intext:"ssh_pwd"',
+                        'site:example.com intext:"mail_password" | intext:"mail_pwd"'
+                    ];
+                    break;
+                    
+                case 4: // Auth Tokens
+                    categoryName = "Auth Tokens";
+                    dorks = [
+                        'site:example.com intext:"cookie" | intext:"session_cookie"',
+                        'site:example.com intext:"auth_token" | intext:"authkey"',
+                        'site:example.com intext:"login_token" | intext:"login_key"',
+                        'site:example.com intext:"user_token" | intext:"user_key"',
+                        'site:example.com intext:"root_password" | intext:"root_pwd"'
+                    ];
+                    break;
+                    
+                case 5: // All Credentials (1-25)
+                    categoryName = "All Credentials";
+                    dorks = [
+                        'site:example.com intext:"password" | intext:"passwd" | intext:"pwd"',
+                        'site:example.com intext:"username" | intext:"user" | intext:"login"',
+                        'site:example.com intext:"email" | intext:"e-mail" | intext:"mail"',
+                        'site:example.com intext:"api_key" | intext:"apikey" | intext:"api-key"',
+                        'site:example.com intext:"secret" | intext:"token" | intext:"auth"',
+                        'site:example.com intext:"private key" | intext:"private_key"',
+                        'site:example.com intext:"access key" | intext:"access_key"',
+                        'site:example.com intext:"bearer token" | intext:"bearer_token"',
+                        'site:example.com intext:"oauth" | intext:"oauth_token"',
+                        'site:example.com intext:"session" | intext:"session_id"',
+                        'site:example.com intext:"cookie" | intext:"session_cookie"',
+                        'site:example.com intext:"auth_token" | intext:"authkey"',
+                        'site:example.com intext:"login_token" | intext:"login_key"',
+                        'site:example.com intext:"user_token" | intext:"user_key"',
+                        'site:example.com intext:"admin_password" | intext:"admin_pwd"',
+                        'site:example.com intext:"db_password" | intext:"db_pwd"',
+                        'site:example.com intext:"ftp_password" | intext:"ftp_pwd"',
+                        'site:example.com intext:"ssh_password" | intext:"ssh_pwd"',
+                        'site:example.com intext:"mail_password" | intext:"mail_pwd"',
+                        'site:example.com intext:"config_password" | intext:"config_pwd"',
+                        'site:example.com intext:"root_password" | intext:"root_pwd"',
+                        'site:example.com intext:"sa_password" | intext:"sa_pwd"',
+                        'site:example.com intext:"galera_password" | intext:"galera_pwd"',
+                        'site:example.com intext:"xwiki_password" | intext:"xwiki_pwd"',
+                        'site:example.com intext:"sonar_password" | intext:"sonar_pwd"'
+                    ];
+                    break;
+                    
+                case 6: // User Data in SQL
+                    categoryName = "User Data in SQL";
+                    dorks = [
+                        'site:example.com ext:sql intext:"password" | intext:"username"',
+                        'site:example.com ext:sql intext:"email" | intext:"user"',
+                        'site:example.com ext:sql intext:"phone" | intext:"telephone"',
+                        'site:example.com ext:sql intext:"address" | intext:"street"',
+                        'site:example.com ext:sql intext:"first name" | intext:"last name"'
+                    ];
+                    break;
+                    
+                case 7: // Financial Data in SQL
+                    categoryName = "Financial Data";
+                    dorks = [
+                        'site:example.com ext:sql intext:"credit card" | intext:"cc"',
+                        'site:example.com ext:sql intext:"account" | intext:"balance"',
+                        'site:example.com ext:sql intext:"transaction" | intext:"payment"',
+                        'site:example.com ext:sql intext:"salary" | intext:"income"',
+                        'site:example.com ext:sql intext:"price" | intext:"cost"'
+                    ];
+                    break;
+                    
+                case 8: // Personal Info in SQL
+                    categoryName = "Personal Info";
+                    dorks = [
+                        'site:example.com ext:sql intext:"ssn" | intext:"social security"',
+                        'site:example.com ext:sql intext:"dob" | intext:"date of birth"',
+                        'site:example.com ext:sql intext:"gender" | intext:"sex"',
+                        'site:example.com ext:sql intext:"zip" | intext:"postal"',
+                        'site:example.com ext:sql intext:"country" | intext:"city"'
+                    ];
+                    break;
+                    
+                case 41: // Top 50 Most Critical
+                    categoryName = "Top 50 Critical";
+                    dorks = [
+                        'site:example.com intext:"password" | intext:"passwd" | intext:"pwd"',
+                        'site:example.com intext:"username" | intext:"user" | intext:"login"',
+                        'site:example.com intext:"email" | intext:"e-mail" | intext:"mail"',
+                        'site:example.com intext:"api_key" | intext:"apikey" | intext:"api-key"',
+                        'site:example.com intext:"secret" | intext:"token" | intext:"auth"',
+                        'site:example.com intext:"private key" | intext:"private_key"',
+                        'site:example.com intext:"access key" | intext:"access_key"',
+                        'site:example.com intext:"bearer token" | intext:"bearer_token"',
+                        'site:example.com intext:"oauth" | intext:"oauth_token"',
+                        'site:example.com intext:"session" | intext:"session_id"',
+                        'site:example.com ext:sql intext:"password" | intext:"username"',
+                        'site:example.com ext:sql intext:"email" | intext:"user"',
+                        'site:example.com ext:sql intext:"credit card" | intext:"cc"',
+                        'site:example.com ext:sql intext:"ssn" | intext:"social security"',
+                        'site:example.com ext:env intext:"DB_PASSWORD" | intext:"DB_USER"',
+                        'site:example.com ext:env intext:"API_KEY" | intext:"API_SECRET"',
+                        'site:example.com ext:env intext:"AWS_ACCESS_KEY" | intext:"AWS_SECRET_KEY"',
+                        'site:example.com intext:"AKIA" | intext:"AWS_ACCESS_KEY"',
+                        'site:example.com intext:"AIza" | intext:"GOOGLE_API_KEY"',
+                        'site:example.com intext:"sk_live_" | intext:"STRIPE_LIVE_KEY"',
+                        'site:example.com intext:"credit card" | intext:"cc" | intext:"card number"',
+                        'site:example.com intext:"cvv" | intext:"cvc" | intext:"cid"',
+                        'site:example.com intext:"ssn" | intext:"social security" | intext:"social security number"',
+                        'site:example.com intext:"bank account" | intext:"account number"',
+                        'site:example.com intext:"routing number" | intext:"routing"',
+                        'site:example.com intext:"swift" | intext:"bic" | intext:"iban"',
+                        'site:example.com intext:"bitcoin" | intext:"btc" | intext:"crypto"',
+                        'site:example.com intext:"confidential" | intext:"internal use only"',
+                        'site:example.com intext:"proprietary" | intext:"trade secret"',
+                        'site:example.com intext:"classified" | intext:"restricted"',
+                        'site:example.com intext:"employee" | intext:"staff" | intext:"personnel"',
+                        'site:example.com intext:"HR" | intext:"human resources" | intext:"payroll"',
+                        'site:example.com intext:"financial" | intext:"revenue" | intext:"profit"',
+                        'site:example.com intext:"budget" | intext:"forecast" | intext:"projection"',
+                        'site:example.com intext:"strategy" | intext:"plan" | intext:"roadmap"',
+                        'site:example.com intext:"acquisition" | intext:"merger" | intext:"takeover"',
+                        'site:example.com intext:"database" | intext:"db" | intext:"schema"',
+                        'site:example.com intext:"server" | intext:"host" | intext:"ip"',
+                        'site:example.com intext:"port" | intext:"protocol" | intext:"service"',
+                        'site:example.com intext:"firewall" | intext:"router" | intext:"switch"',
+                        'site:example.com intext:"network" | intext:"lan" | intext:"wan"',
+                        'site:example.com intext:"vpn" | intext:"tunnel" | intext:"proxy"',
+                        'site:example.com intext:"dns" | intext:"domain" | intext:"subdomain"',
+                        'site:example.com intext:"certificate" | intext:"ssl" | intext:"tls"',
+                        'site:example.com intext:"key" | intext:"certificate" | intext:"pem"',
+                        'site:example.com intext:"ssh" | intext:"rsa" | intext:"dsa"'
+                    ];
+                    break;
+                    
+                case 42: // Financial Data Focus
+                    categoryName = "Financial Data Focus";
+                    dorks = [
+                        'site:example.com ext:sql intext:"credit card" | intext:"cc"',
+                        'site:example.com ext:sql intext:"account" | intext:"balance"',
+                        'site:example.com ext:sql intext:"transaction" | intext:"payment"',
+                        'site:example.com ext:sql intext:"salary" | intext:"income"',
+                        'site:example.com ext:sql intext:"price" | intext:"cost"',
+                        'site:example.com intext:"credit card" | intext:"cc" | intext:"card number"',
+                        'site:example.com intext:"cvv" | intext:"cvc" | intext:"cid"',
+                        'site:example.com intext:"expiry" | intext:"expiration" | intext:"exp date"',
+                        'site:example.com intext:"bank account" | intext:"account number"',
+                        'site:example.com intext:"routing number" | intext:"routing"',
+                        'site:example.com intext:"swift" | intext:"bic" | intext:"iban"',
+                        'site:example.com intext:"bitcoin" | intext:"btc" | intext:"crypto"',
+                        'site:example.com intext:"wallet" | intext:"wallet address"',
+                        'site:example.com intext:"transaction" | intext:"payment" | intext:"purchase"',
+                        'site:example.com intext:"invoice" | intext:"receipt" | intext:"bill"',
+                        'site:example.com intext:"salary" | intext:"income" | intext:"wage"',
+                        'site:example.com intext:"tax" | intext:"tax return" | intext:"tax id"',
+                        'site:example.com intext:"insurance" | intext:"policy" | intext:"policy number"',
+                        'site:example.com intext:"financial" | intext:"revenue" | intext:"profit"',
+                        'site:example.com intext:"budget" | intext:"forecast" | intext:"projection"',
+                        'site:example.com intext:"income statement" | intext:"balance sheet"',
+                        'site:example.com intext:"cash flow" | intext:"earnings" | intext:"revenue"',
+                        'site:example.com intext:"quarterly report" | intext:"annual report"',
+                        'site:example.com ext:xls | ext:xlsx intext:"financial" | intext:"budget"',
+                        'site:example.com ext:pdf intext:"financial" | intext:"revenue" | intext:"profit"',
+                        'site:example.com ext:sql intext:"order" | intext:"invoice"',
+                        'site:example.com ext:sql intext:"customer" | intext:"client"',
+                        'site:example.com ext:sql intext:"product" | intext:"item"',
+                        'site:example.com ext:sql intext:"quantity" | intext:"amount"',
+                        'site:example.com ext:sql intext:"discount" | intext:"coupon"',
+                        'site:example.com ext:sql intext:"shipping" | intext:"delivery"',
+                        'site:example.com ext:sql intext:"billing" | intext:"invoice"',
+                        'site:example.com ext:sql intext:"tax" | intext:"vat"',
+                        'site:example.com ext:sql intext:"refund" | intext:"return"'
+                    ];
+                    break;
+                    
+                case 43: // PII Focus
+                    categoryName = "PII Focus";
+                    dorks = [
+                        'site:example.com ext:sql intext:"email" | intext:"user"',
+                        'site:example.com ext:sql intext:"phone" | intext:"telephone"',
+                        'site:example.com ext:sql intext:"address" | intext:"street"',
+                        'site:example.com ext:sql intext:"zip" | intext:"postal"',
+                        'site:example.com ext:sql intext:"country" | intext:"city"',
+                        'site:example.com ext:sql intext:"first name" | intext:"last name"',
+                        'site:example.com ext:sql intext:"dob" | intext:"date of birth"',
+                        'site:example.com ext:sql intext:"gender" | intext:"sex"',
+                        'site:example.com intext:"ssn" | intext:"social security" | intext:"social security number"',
+                        'site:example.com intext:"passport" | intext:"passport number"',
+                        'site:example.com intext:"driver license" | intext:"driver\'s license"',
+                        'site:example.com intext:"dob" | intext:"date of birth" | intext:"birthday"',
+                        'site:example.com intext:"gender" | intext:"sex" | intext:"male" | intext:"female"',
+                        'site:example.com intext:"address" | intext:"street" | intext:"city"',
+                        'site:example.com intext:"phone" | intext:"telephone" | intext:"mobile"',
+                        'site:example.com intext:"email" | intext:"e-mail" | intext:"mail address"',
+                        'site:example.com intext:"zip" | intext:"postal" | intext:"postcode"',
+                        'site:example.com intext:"country" | intext:"state" | intext:"province"',
+                        'site:example.com intext:"medical" | intext:"health" | intext:"patient"',
+                        'site:example.com intext:"diagnosis" | intext:"treatment" | intext:"prescription"',
+                        'site:example.com intext:"doctor" | intext:"physician" | intext:"hospital"',
+                        'site:example.com ext:csv intext:"email" | intext:"phone"',
+                        'site:example.com ext:xls | ext:xlsx intext:"personal" | intext:"contact"',
+                        'site:example.com ext:pdf intext:"personal" | intext:"confidential"',
+                        'site:example.com intext:"employee" | intext:"staff" | intext:"personnel"',
+                        'site:example.com intext:"HR" | intext:"human resources" | intext:"payroll"',
+                        'site:example.com intext:"salary" | intext:"compensation" | intext:"benefits"',
+                        'site:example.com intext:"performance" | intext:"review" | intext:"evaluation"',
+                        'site:example.com intext:"termination" | intext:"firing" | intext:"dismissal"',
+                        'site:example.com intext:"insurance" | intext:"policy" | intext:"policy number"',
+                        'site:example.com intext:"patient" | intext:"medical" | intext:"health"',
+                        'site:example.com intext:"student" | intext:"education" | intext:"school"',
+                        'site:example.com intext:"customer" | intext:"client" | intext:"account"',
+                        'site:example.com intext:"user" | intext:"profile" | intext:"account"',
+                        'site:example.com intext:"member" | intext:"subscription" | intext:"registration"'
+                    ];
+                    break;
+                    
+                case 44: // Credentials Focus
+                    categoryName = "Credentials Focus";
+                    dorks = [
+                        'site:example.com intext:"password" | intext:"passwd" | intext:"pwd"',
+                        'site:example.com intext:"username" | intext:"user" | intext:"login"',
+                        'site:example.com intext:"email" | intext:"e-mail" | intext:"mail"',
+                        'site:example.com intext:"api_key" | intext:"apikey" | intext:"api-key"',
+                        'site:example.com intext:"secret" | intext:"token" | intext:"auth"',
+                        'site:example.com intext:"private key" | intext:"private_key"',
+                        'site:example.com intext:"access key" | intext:"access_key"',
+                        'site:example.com intext:"bearer token" | intext:"bearer_token"',
+                        'site:example.com intext:"oauth" | intext:"oauth_token"',
+                        'site:example.com intext:"session" | intext:"session_id"',
+                        'site:example.com intext:"cookie" | intext:"session_cookie"',
+                        'site:example.com intext:"auth_token" | intext:"authkey"',
+                        'site:example.com intext:"login_token" | intext:"login_key"',
+                        'site:example.com intext:"user_token" | intext:"user_key"',
+                        'site:example.com intext:"admin_password" | intext:"admin_pwd"',
+                        'site:example.com intext:"db_password" | intext:"db_pwd"',
+                        'site:example.com intext:"ftp_password" | intext:"ftp_pwd"',
+                        'site:example.com intext:"ssh_password" | intext:"ssh_pwd"',
+                        'site:example.com intext:"mail_password" | intext:"mail_pwd"',
+                        'site:example.com intext:"config_password" | intext:"config_pwd"',
+                        'site:example.com intext:"root_password" | intext:"root_pwd"',
+                        'site:example.com intext:"sa_password" | intext:"sa_pwd"',
+                        'site:example.com intext:"galera_password" | intext:"galera_pwd"',
+                        'site:example.com intext:"xwiki_password" | intext:"xwiki_pwd"',
+                        'site:example.com intext:"sonar_password" | intext:"sonar_pwd"',
+                        'site:example.com ext:env intext:"DB_PASSWORD" | intext:"DB_USER"',
+                        'site:example.com ext:env intext:"API_KEY" | intext:"API_SECRET"',
+                        'site:example.com ext:env intext:"AWS_ACCESS_KEY" | intext:"AWS_SECRET_KEY"',
+                        'site:example.com ext:env intext:"MAIL_PASSWORD" | intext:"MAIL_USER"',
+                        'site:example.com ext:env intext:"REDIS_PASSWORD" | intext:"REDIS_HOST"',
+                        'site:example.com ext:env intext:"MONGODB_URI" | intext:"MONGO_PASSWORD"',
+                        'site:example.com ext:env intext:"POSTGRES_PASSWORD" | intext:"POSTGRES_USER"',
+                        'site:example.com ext:env intext:"MYSQL_PASSWORD" | intext:"MYSQL_USER"',
+                        'site:example.com ext:env intext:"FTP_PASSWORD" | intext:"FTP_USER"',
+                        'site:example.com ext:env intext:"SSH_PASSWORD" | intext:"SSH_USER"',
+                        'site:example.com ext:env intext:"SLACK_TOKEN" | intext:"SLACK_WEBHOOK"',
+                        'site:example.com ext:env intext:"DISCORD_TOKEN" | intext:"DISCORD_WEBHOOK"',
+                        'site:example.com ext:env intext:"TELEGRAM_TOKEN" | intext:"TELEGRAM_WEBHOOK"',
+                        'site:example.com ext:env intext:"FACEBOOK_APP_ID" | intext:"FACEBOOK_APP_SECRET"',
+                        'site:example.com ext:env intext:"GOOGLE_CLIENT_ID" | intext:"GOOGLE_CLIENT_SECRET"',
+                        'site:example.com ext:env intext:"GITHUB_CLIENT_ID" | intext:"GITHUB_CLIENT_SECRET"',
+                        'site:example.com ext:env intext:"TWITTER_API_KEY" | intext:"TWITTER_API_SECRET"',
+                        'site:example.com ext:env intext:"LINKEDIN_CLIENT_ID" | intext:"LINKEDIN_CLIENT_SECRET"',
+                        'site:example.com ext:env intext:"INSTAGRAM_CLIENT_ID" | intext:"INSTAGRAM_CLIENT_SECRET"',
+                        'site:example.com ext:env intext:"PAYPAL_CLIENT_ID" | intext:"PAYPAL_CLIENT_SECRET"',
+                        'site:example.com ext:env intext:"STRIPE_KEY" | intext:"STRIPE_SECRET"',
+                        'site:example.com ext:env intext:"BRAINTREE_MERCHANT_ID" | intext:"BRAINTREE_PUBLIC_KEY"',
+                        'site:example.com ext:env intext:"AUTH0_CLIENT_ID" | intext:"AUTH0_CLIENT_SECRET"',
+                        'site:example.com ext:env intext:"OKTA_CLIENT_ID" | intext:"OKTA_CLIENT_SECRET"',
+                        'site:example.com ext:env intext:"JWT_SECRET" | intext:"JWT_KEY"'
+                    ];
+                    break;
+                    
+                default:
+                    alert('Invalid option.');
+                    return;
+            }
+            
+            // Update results section
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('resultsSection').querySelector('h2').textContent = 
+                'Generated Google Dorks - ' + categoryName + ' (' + dorks.length + ' dorks)';
+            
+            // Clear previous results
+            const dorkList = document.getElementById('dorkList');
+            dorkList.innerHTML = '';
+            
+            // Add dorks to the list
+            dorks.forEach((dork, index) => {
+                const searchQuery = dork.replace(/example\.com/g, targetDomain);
+                const listItem = document.createElement('li');
+                listItem.className = 'dork-item';
+                
+                listItem.innerHTML = `
+                    <span class="dork-query">${index + 1}. ${searchQuery}</span>
+                    <button class="dork-action" onclick="window.open('https://www.google.com/search?q=${encodeURIComponent(searchQuery)}', '_blank')">
+                        Search
+                    </button>
+                `;
+                
+                dorkList.appendChild(listItem);
+            });
+            
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function validateDomain() {
+            const domain = document.getElementById('sdtarget').value;
+            if (!domain) {
+                alert('Please enter a target domain.');
+                return;
+            }
+            
+            // Simple domain validation
+            const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+            if (!domainRegex.test(domain)) {
+                alert('Please enter a valid domain name (e.g., example.com)');
+                return;
+            }
+            
+            alert('Domain set to: ' + domain);
+        }
+        
+        // Allow Enter key to set domain
+        document.getElementById('sdtarget').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                validateDomain();
+            }
+        });
+    </script>
+</body>
+</html>
